@@ -1,0 +1,26 @@
+{
+  "name": "Team Escape 2026",
+  "tagline": "Two days of good vibes, great people, and zero standups.",
+  "startDate": "2026-10-02T10:00:00",
+  "endDate": "2026-10-03T14:00:00",
+  "location": {
+    "name": "Venue TBD",
+    "address": "Bulgaria",
+    "mapUrl": "https://maps.google.com/?q=Bulgaria"
+  },
+  "highlights": [
+    { "icon": "🎮", "title": "Team Games", "text": "Friendly competition, big laughs, good memories." },
+    { "icon": "💆", "title": "Spa & Relax", "text": "Time to unwind and recharge together." },
+    { "icon": "🍽️", "title": "Group Dinners", "text": "Shared meals, great food, even better company." },
+    { "icon": "🎉", "title": "Party Night", "text": "Let loose — it's the end of Q3." }
+  ],
+  "organizer": {
+    "name": "Ani Dermendzhieva",
+    "email": "ani.dermendzhieva@sap.com",
+    "phone": "+359896124153"
+  },
+  "emergencyContacts": [
+    { "label": "Organizer", "name": "Ani Dermendzhieva", "phone": "+359896124153" },
+    { "label": "Emergency (EU)", "name": "General emergency", "phone": "112" }
+  ]
+}

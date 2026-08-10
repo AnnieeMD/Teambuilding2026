@@ -1,0 +1,16 @@
+{
+  "people": [
+    { "id": "alex",    "name": "Alex Ivanov",    "emoji": "🧗" },
+    { "id": "bea",     "name": "Bea Petrova",     "emoji": "📸" },
+    { "id": "chen",    "name": "Chen Wang",       "emoji": "🎸" },
+    { "id": "dora",    "name": "Dora Kolева",     "emoji": "🧭" },
+    { "id": "emil",    "name": "Emil Georgiev",   "emoji": "🍳" },
+    { "id": "fatima",  "name": "Fatima Nasser",   "emoji": "🏃" },
+    { "id": "georgi",  "name": "Georgi Dimitrov", "emoji": "🎲" },
+    { "id": "hana",    "name": "Hana Novak",      "emoji": "🎨" },
+    { "id": "ivan",    "name": "Ivan Todorov",    "emoji": "🚴" },
+    { "id": "julia",   "name": "Julia Marković",  "emoji": "🎤" },
+    { "id": "kiril",   "name": "Kiril Angelov",   "emoji": "♟️" },
+    { "id": "lena",    "name": "Lena Fischer",    "emoji": "🧘" }
+  ]
+}

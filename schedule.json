@@ -1,0 +1,29 @@
+{
+  "days": [
+    {
+      "date": "2026-10-02",
+      "label": "Day 1 — Friday",
+      "subtitle": "Arrive, play, party",
+      "items": [
+        { "time": "10:00", "title": "Departure", "location": "Office parking lot", "icon": "🚗", "note": "See the Transport page for your car group." },
+        { "time": "11:30", "title": "Arrival & check-in", "location": "Venue", "icon": "🏨", "note": "Drop your bags and settle in." },
+        { "time": "13:00", "title": "Lunch", "location": "Restaurant", "icon": "🍽️", "note": "" },
+        { "time": "15:00", "title": "Team games", "location": "Outdoor area", "icon": "🎮", "note": "Friendly competition — may the best team win." },
+        { "time": "17:30", "title": "Spa & free time", "location": "Spa / pool", "icon": "💆", "note": "Relax, swim, or just do nothing." },
+        { "time": "20:00", "title": "Dinner", "location": "Restaurant", "icon": "🍴", "note": "See the Meals page for your choice." },
+        { "time": "22:00", "title": "Party 🎉", "location": "TBD", "icon": "🎉", "note": "Let loose." }
+      ]
+    },
+    {
+      "date": "2026-10-03",
+      "label": "Day 2 — Saturday",
+      "subtitle": "Relax & head home",
+      "items": [
+        { "time": "09:00", "title": "Breakfast", "location": "Restaurant", "icon": "🥐", "note": "" },
+        { "time": "10:30", "title": "Spa & free time", "location": "Spa / pool", "icon": "💆", "note": "Last chance to enjoy the facilities." },
+        { "time": "12:30", "title": "Group photo", "location": "Front entrance", "icon": "📸", "note": "Don't be late!" },
+        { "time": "13:00", "title": "Check-out & drive home", "location": "Reception", "icon": "🚗", "note": "See the Transport page for your car group." }
+      ]
+    }
+  ]
+}

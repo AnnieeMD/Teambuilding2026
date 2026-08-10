@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rooms</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .room-card { position: relative; cursor: pointer; }
+    .room-card.full { opacity: 0.6; cursor: not-allowed; }
+    .room-card.mine {
+      border-color: var(--c-teal) !important;
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.15), var(--shadow-hover) !important;
+    }
+    .mine-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--c-teal); color: #fff;
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 2px 8px; border-radius: 99px;
+    }
+    .capacity-bar {
+      height: 4px; border-radius: 99px;
+      background: var(--c-bg2);
+      margin-top: var(--sp-s);
+      overflow: hidden;
+    }
+    .capacity-bar__fill {
+      height: 100%; border-radius: 99px;
+      background: var(--g-accent);
+      transition: width 0.4s ease;
+    }
+    .capacity-bar__fill.full { background: #dc2626; }
+    .not-registered {
+      background: rgba(217,119,6,0.07);
+      border: 1px solid rgba(217,119,6,0.2);
+      border-radius: var(--r-m);
+      padding: var(--sp-m) var(--sp-l);
+      margin-bottom: var(--sp-l);
+      display: flex; align-items: center; gap: var(--sp-m);
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="page">
+    <div class="container">
+      <div class="page-header fade-up">
+        <p class="page-header__eyebrow">Who sleeps where</p>
+        <h1>🏨 Rooms</h1>
+      </div>
+
+      <div id="login-prompt" class="not-registered" style="display:none">
+        <span style="font-size:1.5rem">👋</span>
+        <div>
+          <strong>Register first to choose a room.</strong>
+          <span class="text-muted text-small"> You can still see who's booked what.</span>
+        </div>
+        <a href="register.html" style="margin-left:auto;padding:8px 18px;background:var(--g-accent);color:#fff;border-radius:var(--r-s);font-weight:700;font-size:0.875rem;white-space:nowrap">Register →</a>
+      </div>
+
+      <div class="stats-row fade-up" id="rooms-stats"></div>
+      <div class="card-grid" id="rooms-grid"></div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/shared.js"></script>
+  <script type="module">
+    import { getSession, saveChoices, onAllData } from '../js/db.js';
+
+    async function init() {
+      const { event, rooms } = await loadAll();
+      renderNav(event.name);
+      renderFooter();
+      document.title = `Rooms · ${event.name}`;
+
+      const session = getSession();
+      if (!session) document.getElementById('login-prompt').style.display = 'flex';
+
+      onAllData((regs, choices) => render(rooms, regs, choices, session));
+    }
+
+    function render(rooms, regs, choices, session) {
+      // Stats
+      const filled = rooms.filter(r => {
+        const count = Object.values(choices).filter(c => c.roomId === r.number).length;
+        return count >= r.capacity;
+      }).length;
+
+      document.getElementById('rooms-stats').innerHTML = `
+        <div class="stat-box"><span class="stat-box__num">${rooms.length}</span><span class="stat-box__label">Rooms</span></div>
+        <div class="stat-box"><span class="stat-box__num">${rooms.length - filled}</span><span class="stat-box__label">Available</span></div>
+        <div class="stat-box"><span class="stat-box__num">${Object.keys(choices).length}</span><span class="stat-box__label">Booked</span></div>
+      `;
+
+      // My current room
+      const myChoice = session ? (choices[session.userId] || {}) : {};
+
+      document.getElementById('rooms-grid').innerHTML = rooms.map(room => {
+        const occupantIds = Object.entries(choices)
+          .filter(([, c]) => c.roomId === room.number)
+          .map(([uid]) => uid);
+        const occupants = occupantIds.map(uid => regs[uid]).filter(Boolean);
+        const isFull    = occupants.length >= room.capacity;
+        const isMine    = session && myChoice.roomId === room.number;
+
+        return `
+          <div class="card room-card${isFull && !isMine ? ' full' : ''}${isMine ? ' mine' : ''}"
+               data-room="${room.number}"
+               data-full="${isFull && !isMine}"
+               title="${isFull && !isMine ? 'Room full' : isMine ? 'Your room — click to leave' : 'Click to choose this room'}">
+            ${isMine ? '<span class="mine-badge">Your room ✓</span>' : ''}
+            <div class="room-card__header">
+              <div>
+                <div class="room-name">${room.name}</div>
+                <div class="room-type-floor">${room.type} · ${room.floor}</div>
+              </div>
+              <span class="room-number">${room.number}</span>
+            </div>
+            <div class="divider"></div>
+            <div class="chips" style="min-height:30px">
+              ${occupants.map(p => personChip(p)).join('') || '<span class="text-muted text-small">No one yet</span>'}
+            </div>
+            <div class="capacity-bar" style="margin-top:10px">
+              <div class="capacity-bar__fill${isFull ? ' full' : ''}"
+                   style="width:${Math.min(100, (occupants.length / room.capacity) * 100)}%"></div>
+            </div>
+            <div style="font-size:0.72rem;color:var(--c-muted);margin-top:4px;text-align:right">
+              ${occupants.length} / ${room.capacity}
+            </div>
+          </div>`;
+      }).join('');
+
+      // Click handlers
+      if (session) {
+        document.querySelectorAll('.room-card').forEach(card => {
+          card.addEventListener('click', async () => {
+            if (card.dataset.full === 'true') return;
+            const roomId  = card.dataset.room;
+            const leaving = myChoice.roomId === roomId;
+            await saveChoices(session.userId, { roomId: leaving ? null : roomId });
+          });
+        });
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .register-wrap {
+      min-height: calc(100vh - var(--nav-h));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-l) var(--sp-m);
+    }
+
+    .register-card {
+      background: var(--c-surface2);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r-xl);
+      padding: var(--sp-l) var(--sp-xl);
+      box-shadow: var(--shadow-hover);
+      max-width: 440px;
+      width: 100%;
+    }
+
+    .register-card h2 { margin-bottom: 6px; }
+    .register-card .sub { color: var(--c-muted); font-size: 0.95rem; margin-bottom: var(--sp-l); }
+
+    .form-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--sp-m); }
+
+    label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--c-muted);
+      font-weight: 600;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--c-border2);
+      border-radius: var(--r-s);
+      background: var(--c-bg);
+      color: var(--c-heading);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--c-teal);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+    }
+
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+
+    .emoji-btn {
+      font-size: 1.4rem;
+      padding: 6px;
+      border-radius: var(--r-s);
+      border: 2px solid transparent;
+      background: var(--c-bg2);
+      cursor: pointer;
+      transition: border-color var(--t-fast), background var(--t-fast), transform var(--t-fast);
+      line-height: 1;
+      text-align: center;
+    }
+
+    .emoji-btn:hover { background: var(--c-bg); transform: scale(1.15); }
+
+    .emoji-btn.selected {
+      border-color: var(--c-teal);
+      background: rgba(13,148,136,0.1);
+      transform: scale(1.1);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: var(--g-accent);
+      color: #fff;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      border-radius: var(--r-m);
+      cursor: pointer;
+      transition: opacity var(--t-fast), transform var(--t-fast);
+      margin-top: var(--sp-s);
+    }
+
+    .btn-primary:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .already-in {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-m);
+      padding: var(--sp-m);
+      background: rgba(13,148,136,0.06);
+      border: 1px solid rgba(13,148,136,0.2);
+      border-radius: var(--r-m);
+      margin-bottom: var(--sp-m);
+    }
+
+    .already-in__name { font-weight: 700; color: var(--c-heading); }
+    .already-in__sub  { font-size: 0.82rem; color: var(--c-muted); }
+
+    .btn-secondary {
+      padding: 8px 16px;
+      background: none;
+      border: 1px solid var(--c-border2);
+      border-radius: var(--r-s);
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--c-muted);
+      font-family: var(--font-body);
+      transition: border-color var(--t-fast), color var(--t-fast);
+      white-space: nowrap;
+    }
+    .btn-secondary:hover { border-color: var(--c-teal); color: var(--c-teal-dim); }
+
+    .error-msg {
+      color: #b91c1c;
+      font-size: 0.82rem;
+      background: rgba(220,38,38,0.07);
+      border: 1px solid rgba(220,38,38,0.15);
+      border-radius: var(--r-s);
+      padding: 8px 12px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    .success-msg {
+      text-align: center;
+      padding: var(--sp-l) 0;
+    }
+    .success-msg .big-emoji { font-size: 4rem; display: block; margin-bottom: var(--sp-s); }
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="page">
+    <div class="register-wrap">
+      <div class="register-card fade-up" id="register-card">
+        <h2 class="gradient-text">Join the crew</h2>
+        <p class="sub">Register once — then choose your room, car and meal on each page.</p>
+
+        <!-- Already registered banner (shown if session exists) -->
+        <div class="already-in" id="already-in" style="display:none">
+          <span id="already-emoji" style="font-size:2rem"></span>
+          <div>
+            <div class="already-in__name" id="already-name"></div>
+            <div class="already-in__sub">You're already registered. Not you?</div>
+          </div>
+          <button class="btn-secondary" id="switch-btn">Switch</button>
+        </div>
+
+        <!-- Registration form -->
+        <div id="reg-form">
+          <div class="form-field">
+            <label for="name-input">Your name</label>
+            <input type="text" id="name-input" placeholder="e.g. Ani Dermendzhieva" maxlength="40" autocomplete="off" />
+          </div>
+
+          <div class="form-field">
+            <label>Pick your emoji</label>
+            <div class="emoji-grid" id="emoji-grid"></div>
+          </div>
+
+          <div class="error-msg" id="error-msg"></div>
+
+          <button class="btn-primary" id="register-btn" disabled>Register →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/shared.js"></script>
+  <script type="module">
+    import { registerUser, getSession, clearSession, getRegistrations } from '../js/db.js';
+
+    const EMOJIS = ['😀','😎','🤩','🥳','🧗','📸','🎸','🧭','🍳','🏃','🎲','🎨',
+                    '🚴','🎤','♟️','🧘','🌿','⚡','🦊','🐻','🌺','🍀','🎯','🚀',
+                    '🦋','🌊','🏔','🎪','🍕','☕','🎭','✨'];
+
+    let selectedEmoji = null;
+
+    async function init() {
+      const { event } = await loadAll();
+      renderNav(event.name);
+      renderFooter();
+      document.title = `Register · ${event.name}`;
+
+      // Emoji grid
+      const grid = document.getElementById('emoji-grid');
+      grid.innerHTML = EMOJIS.map(e => `
+        <button class="emoji-btn" data-emoji="${e}" title="${e}">${e}</button>
+      `).join('');
+
+      grid.querySelectorAll('.emoji-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          grid.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedEmoji = btn.dataset.emoji;
+          updateBtn();
+        });
+      });
+
+      document.getElementById('name-input').addEventListener('input', updateBtn);
+
+      // Check existing session
+      const session = getSession();
+      if (session) showAlreadyIn(session);
+
+      document.getElementById('switch-btn').addEventListener('click', () => {
+        clearSession();
+        document.getElementById('already-in').style.display = 'none';
+        document.getElementById('name-input').value = '';
+        selectedEmoji = null;
+        grid.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+        updateBtn();
+      });
+
+      document.getElementById('register-btn').addEventListener('click', handleRegister);
+    }
+
+    function updateBtn() {
+      const name = document.getElementById('name-input').value.trim();
+      document.getElementById('register-btn').disabled = !name || !selectedEmoji;
+    }
+
+    function showAlreadyIn(session) {
+      document.getElementById('already-in').style.display = 'flex';
+      document.getElementById('already-emoji').textContent = session.emoji;
+      document.getElementById('already-name').textContent  = session.name;
+    }
+
+    async function handleRegister() {
+      const name = document.getElementById('name-input').value.trim();
+      const errEl = document.getElementById('error-msg');
+      errEl.classList.remove('show');
+
+      if (!name || !selectedEmoji) return;
+
+      // Check for duplicate name
+      const existing = await getRegistrations();
+      const taken = Object.values(existing).find(
+        r => r.name.toLowerCase() === name.toLowerCase()
+      );
+      if (taken) {
+        errEl.textContent = `"${name}" is already registered. Is that you? Use the Switch button above if you want to re-register.`;
+        errEl.classList.add('show');
+        return;
+      }
+
+      const btn = document.getElementById('register-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      try {
+        // userId = sanitised lowercase name
+        const userId = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        await registerUser(userId, name, selectedEmoji);
+
+        // Show success then redirect to home
+        document.getElementById('register-card').innerHTML = `
+          <div class="success-msg fade-up">
+            <span class="big-emoji">${selectedEmoji}</span>
+            <h2 class="gradient-text">You're in, ${name.split(' ')[0]}!</h2>
+            <p style="margin-top:var(--sp-s)">Now pick your room, car and meal from the navigation above.</p>
+            <a href="../index.html" style="display:inline-block;margin-top:var(--sp-m);padding:10px 28px;background:var(--g-accent);color:#fff;border-radius:var(--r-m);font-weight:700;">Go to overview →</a>
+          </div>`;
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = 'Register →';
+        errEl.textContent = 'Something went wrong. Check your Firebase config and try again.';
+        errEl.classList.add('show');
+        console.error(e);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

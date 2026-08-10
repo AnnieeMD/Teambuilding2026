@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schedule</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="page">
+    <div class="container">
+      <div class="page-header fade-up">
+        <p class="page-header__eyebrow">What's happening when</p>
+        <h1>🗓 Schedule</h1>
+      </div>
+
+      <div id="schedule-root"></div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="../js/shared.js"></script>
+  <script>
+    (async () => {
+      const { event, schedule } = await loadAll();
+      renderNav(event.name);
+      renderFooter();
+      document.title = `Schedule · ${event.name}`;
+
+      document.getElementById('schedule-root').innerHTML = schedule.days.map(day => `
+        <div class="timeline__day fade-up">
+          <div class="timeline__day-header">
+            <div>
+              <div class="timeline__day-label">${day.label}</div>
+              <div class="timeline__day-subtitle">${day.subtitle}</div>
+            </div>
+            <span class="badge badge--teal">${day.items.length} events</span>
+          </div>
+          <div class="timeline__items">
+            ${day.items.map(item => `
+              <div class="timeline__item">
+                <div class="timeline__item-header">
+                  <span class="timeline__time">${item.time}</span>
+                  <span class="timeline__icon">${item.icon}</span>
+                  <span class="timeline__title">${item.title}</span>
+                </div>
+                <div class="timeline__location">📍 ${item.location}</div>
+                ${item.note ? `<div class="timeline__note">${item.note}</div>` : ''}
+              </div>`).join('')}
+          </div>
+        </div>`).join('');
+    })();
+  </script>
+</body>
+</html>

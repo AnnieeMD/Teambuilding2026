@@ -1,0 +1,11 @@
+{
+  "note": "capacity = max number of people per room.",
+  "rooms": [
+    { "number": "101", "name": "Pine Room",   "type": "Twin",   "floor": "1st floor", "capacity": 2 },
+    { "number": "102", "name": "Cedar Room",  "type": "Twin",   "floor": "1st floor", "capacity": 2 },
+    { "number": "103", "name": "Birch Room",  "type": "Double", "floor": "1st floor", "capacity": 2 },
+    { "number": "201", "name": "Aspen Room",  "type": "Twin",   "floor": "2nd floor", "capacity": 2 },
+    { "number": "202", "name": "Maple Room",  "type": "Twin",   "floor": "2nd floor", "capacity": 2 },
+    { "number": "203", "name": "Willow Room", "type": "Double", "floor": "2nd floor", "capacity": 2 }
+  ]
+}

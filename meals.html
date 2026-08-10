@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .meal-option {
+      display: flex; align-items: center; gap: var(--sp-m);
+      padding: var(--sp-m) var(--sp-l);
+      background: var(--c-surface2);
+      border: 2px solid var(--c-border);
+      border-radius: var(--r-l);
+      cursor: pointer;
+      transition: border-color var(--t-mid), box-shadow var(--t-mid), transform var(--t-mid);
+      box-shadow: var(--shadow-card);
+    }
+    .meal-option:hover { border-color: rgba(13,148,136,0.35); transform: translateY(-2px); }
+    .meal-option.selected {
+      border-color: var(--c-teal);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.12), var(--shadow-hover);
+    }
+    .meal-option__icon { font-size: 2.2rem; flex-shrink: 0; }
+    .meal-option__title { font-weight: 700; color: var(--c-heading); font-size: 1rem; }
+    .meal-option__sub   { font-size: 0.82rem; color: var(--c-muted); }
+    .meal-options-grid  { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--sp-m); margin-bottom: var(--sp-l); }
+
+    .meal-form {
+      background: var(--c-surface2);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r-l);
+      padding: var(--sp-m) var(--sp-l);
+      box-shadow: var(--shadow-card);
+      max-width: 480px;
+      margin-bottom: var(--sp-l);
+    }
+
+    .meal-form textarea {
+      width: 100%; padding: 10px 14px;
+      border: 1px solid var(--c-border2); border-radius: var(--r-s);
+      background: var(--c-bg); color: var(--c-heading);
+      font-family: var(--font-body); font-size: 0.9rem;
+      resize: vertical; min-height: 60px; outline: none;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
+    }
+    .meal-form textarea:focus {
+      border-color: var(--c-teal);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+    }
+
+    .btn-save {
+      padding: 10px 28px;
+      background: var(--g-accent); color: #fff;
+      font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+      border: none; border-radius: var(--r-m); cursor: pointer;
+      transition: opacity var(--t-fast), transform var(--t-fast);
+      margin-top: var(--sp-s);
+    }
+    .btn-save:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+    .btn-save:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .save-status { font-size: 0.82rem; color: var(--c-teal-dim); margin-left: var(--sp-s); opacity: 0; transition: opacity 0.3s; }
+    .save-status.show { opacity: 1; }
+
+    .not-registered {
+      background: rgba(217,119,6,0.07); border: 1px solid rgba(217,119,6,0.2);
+      border-radius: var(--r-m); padding: var(--sp-m) var(--sp-l);
+      margin-bottom: var(--sp-l); display: flex; align-items: center; gap: var(--sp-m);
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="page">
+    <div class="container">
+      <div class="page-header fade-up">
+        <p class="page-header__eyebrow">What everyone eats</p>
+        <h1>🍽️ Meals & Diet</h1>
+      </div>
+
+      <div id="login-prompt" class="not-registered" style="display:none">
+        <span style="font-size:1.5rem">👋</span>
+        <div><strong>Register first to set your meal.</strong>
+          <span class="text-muted text-small"> You can still see everyone's choices.</span></div>
+        <a href="register.html" style="margin-left:auto;padding:8px 18px;background:var(--g-accent);color:#fff;border-radius:var(--r-s);font-weight:700;font-size:0.875rem;white-space:nowrap">Register →</a>
+      </div>
+
+      <!-- Meal picker (only shown when registered) -->
+      <div id="meal-picker" style="display:none">
+        <div class="section__header">
+          <h2 class="section__title"><span>✋</span> Your choice</h2>
+        </div>
+        <div class="meal-options-grid" id="meal-options"></div>
+        <div class="meal-form" id="meal-form">
+          <div class="form-field" style="display:flex;flex-direction:column;gap:6px;margin-bottom:var(--sp-s)">
+            <label style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--c-muted);font-weight:600">
+              Allergies / dietary notes (optional)
+            </label>
+            <textarea id="allergy-input" placeholder="e.g. gluten-free, no nuts, halal…"></textarea>
+          </div>
+          <div style="display:flex;align-items:center">
+            <button class="btn-save" id="save-btn" disabled>Save preferences</button>
+            <span class="save-status" id="save-status">✓ Saved</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="section__header fade-up">
+        <h2 class="section__title"><span>👥</span> Everyone's choices</h2>
+      </div>
+      <div class="meals-grid" id="meals-grid"></div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/shared.js"></script>
+  <script type="module">
+    import { getSession, saveChoices, onAllData } from '../js/db.js';
+
+    const DIET_OPTIONS = [
+      { id: 'meat',       label: 'Meat',        icon: '🍖', desc: 'Full omnivore menu' },
+      { id: 'fish',       label: 'Fish',         icon: '🐟', desc: 'Seafood option' },
+      { id: 'vegetarian', label: 'Vegetarian',   icon: '🥗', desc: 'No meat or fish' },
+      { id: 'vegan',      label: 'Vegan',        icon: '🌱', desc: 'Fully plant-based' },
+    ];
+
+    let selectedDiet = null;
+
+    async function init() {
+      const { event } = await loadAll();
+      renderNav(event.name);
+      renderFooter();
+      document.title = `Meals · ${event.name}`;
+
+      const session = getSession();
+
+      if (!session) {
+        document.getElementById('login-prompt').style.display = 'flex';
+      } else {
+        document.getElementById('meal-picker').style.display = 'block';
+        setupPicker(session);
+      }
+
+      onAllData((regs, choices) => renderSummary(regs, choices, session));
+    }
+
+    function setupPicker(session) {
+      const grid = document.getElementById('meal-options');
+      grid.innerHTML = DIET_OPTIONS.map(o => `
+        <div class="meal-option" data-diet="${o.id}">
+          <span class="meal-option__icon">${o.icon}</span>
+          <div>
+            <div class="meal-option__title">${o.label}</div>
+            <div class="meal-option__sub">${o.desc}</div>
+          </div>
+        </div>`).join('');
+
+      grid.querySelectorAll('.meal-option').forEach(el => {
+        el.addEventListener('click', () => {
+          grid.querySelectorAll('.meal-option').forEach(e => e.classList.remove('selected'));
+          el.classList.add('selected');
+          selectedDiet = el.dataset.diet;
+          document.getElementById('save-btn').disabled = false;
+        });
+      });
+
+      document.getElementById('save-btn').addEventListener('click', async () => {
+        if (!selectedDiet) return;
+        const btn = document.getElementById('save-btn');
+        btn.disabled = true;
+        btn.textContent = 'Saving…';
+
+        const allergies = document.getElementById('allergy-input').value.trim();
+        await saveChoices(session.userId, { diet: selectedDiet, allergyNote: allergies });
+
+        btn.textContent = 'Save preferences';
+        const status = document.getElementById('save-status');
+        status.classList.add('show');
+        setTimeout(() => status.classList.remove('show'), 2500);
+      });
+    }
+
+    function renderSummary(regs, choices, session) {
+      const entries = Object.entries(regs).map(([uid, reg]) => ({
+        uid, ...reg, ...(choices[uid] || {})
+      })).filter(e => e.diet);
+
+      // Pre-select my own saved choice in picker
+      if (session && choices[session.userId]?.diet) {
+        const saved = choices[session.userId].diet;
+        if (selectedDiet !== saved) {
+          selectedDiet = saved;
+          document.querySelectorAll('.meal-option').forEach(el => {
+            el.classList.toggle('selected', el.dataset.diet === saved);
+          });
+          document.getElementById('allergy-input').value = choices[session.userId].allergyNote || '';
+          document.getElementById('save-btn').disabled = false;
+        }
+      }
+
+      // Cards — one per person who has chosen
+      document.getElementById('meals-grid').innerHTML = entries.map(e => `
+        <div class="meal-card" style="${session && e.uid === session.userId ? 'border-color:var(--c-teal)' : ''}">
+          <span class="avatar" style="font-size:1.4rem">${e.emoji}</span>
+          <div class="meal-card__info">
+            <div class="meal-card__name">${e.name}${session && e.uid === session.userId ? ' <span style="font-size:0.7rem;color:var(--c-teal-dim)">(you)</span>' : ''}</div>
+            <div class="mt-s">${dietBadge(e.diet)}</div>
+            ${e.allergyNote ? `<div class="mt-s"><span class="allergy-tag">⚠ ${e.allergyNote}</span></div>` : ''}
+          </div>
+        </div>`).join('');
+    }
+
+    init();
+  </script>
+</body>
+</html>
