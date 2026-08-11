@@ -33,6 +33,68 @@
       margin-bottom: var(--sp-l);
       display: flex; align-items: center; gap: var(--sp-m);
     }
+
+    /* Add-car controls */
+    .addcar-bar { display: flex; justify-content: flex-end; margin-bottom: var(--sp-m); }
+    .btn-addcar {
+      padding: 10px 20px;
+      background: var(--g-accent); color: #fff;
+      font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+      border: none; border-radius: var(--r-m); cursor: pointer;
+      transition: opacity var(--t-fast), transform var(--t-fast);
+    }
+    .btn-addcar:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+    .btn-addcar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .addcar-form {
+      background: var(--c-surface2);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r-l);
+      padding: var(--sp-l);
+      box-shadow: var(--shadow-card);
+      margin-bottom: var(--sp-l);
+      max-width: 560px;
+      display: none;
+    }
+    .addcar-form.open { display: block; }
+    .addcar-form h3 { margin-bottom: var(--sp-m); }
+    .addcar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-m); }
+    .addcar-field { display: flex; flex-direction: column; gap: 6px; }
+    .addcar-field.full-row { grid-column: 1 / -1; }
+    .addcar-field label {
+      font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--c-muted); font-weight: 600;
+    }
+    .addcar-field input {
+      padding: 9px 12px; border: 1px solid var(--c-border2); border-radius: var(--r-s);
+      background: var(--c-bg); color: var(--c-heading);
+      font-family: var(--font-body); font-size: 0.92rem; outline: none;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
+    }
+    .addcar-field input:focus {
+      border-color: var(--c-teal); box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+    }
+    .addcar-actions { display: flex; gap: var(--sp-s); margin-top: var(--sp-m); }
+    .btn-cancel {
+      padding: 9px 18px; background: none; border: 1px solid var(--c-border2);
+      border-radius: var(--r-s); cursor: pointer; color: var(--c-muted);
+      font-family: var(--font-body); font-size: 0.88rem;
+    }
+    .btn-cancel:hover { border-color: var(--c-teal); color: var(--c-teal-dim); }
+
+    .btn-remove-car {
+      margin-top: var(--sp-s);
+      width: 100%;
+      padding: 7px; background: rgba(220,38,38,0.07);
+      border: 1px solid rgba(220,38,38,0.2); color: #b91c1c;
+      border-radius: var(--r-s); cursor: pointer;
+      font-size: 0.8rem; font-weight: 600;
+      font-family: var(--font-body);
+      transition: background var(--t-fast);
+    }
+    .btn-remove-car:hover { background: rgba(220,38,38,0.14); }
+
+    .owner-tag { font-size: 0.72rem; color: var(--c-muted); margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -48,10 +110,50 @@
       <div id="login-prompt" class="not-registered" style="display:none">
         <span style="font-size:1.5rem">👋</span>
         <div>
-          <strong>Register first to join a car.</strong>
+          <strong>Register or log in to join or add a car.</strong>
           <span class="text-muted text-small"> You can still see who's in which car.</span>
         </div>
-        <a href="register.html" style="margin-left:auto;padding:8px 18px;background:var(--g-accent);color:#fff;border-radius:var(--r-s);font-weight:700;font-size:0.875rem;white-space:nowrap">Register →</a>
+        <span style="margin-left:auto;display:inline-flex;gap:8px">
+          <a href="login.html" style="padding:8px 16px;background:none;border:1px solid var(--c-border2);color:var(--c-muted);border-radius:var(--r-s);font-weight:600;font-size:0.875rem;white-space:nowrap">Log in</a>
+          <a href="register.html" style="padding:8px 18px;background:var(--g-accent);color:#fff;border-radius:var(--r-s);font-weight:700;font-size:0.875rem;white-space:nowrap">Register →</a>
+        </span>
+      </div>
+
+      <!-- Add-car button (logged-in only) -->
+      <div class="addcar-bar" id="addcar-bar" style="display:none">
+        <button class="btn-addcar" id="toggle-addcar">＋ Add my car</button>
+      </div>
+
+      <!-- Add-car form -->
+      <div class="addcar-form" id="addcar-form">
+        <h3 class="gradient-text">Add your car</h3>
+        <div class="addcar-grid">
+          <div class="addcar-field full-row">
+            <label for="car-name">Car name / description</label>
+            <input type="text" id="car-name" placeholder="e.g. My Blue Golf" maxlength="50" />
+          </div>
+          <div class="addcar-field">
+            <label for="car-capacity">Total seats (incl. you)</label>
+            <input type="number" id="car-capacity" min="1" max="9" value="4" />
+          </div>
+          <div class="addcar-field">
+            <label for="car-departure">Departure time</label>
+            <input type="datetime-local" id="car-departure" value="2026-10-02T10:00" />
+          </div>
+          <div class="addcar-field full-row">
+            <label for="car-from">Meeting point</label>
+            <input type="text" id="car-from" placeholder="e.g. Office parking lot" maxlength="60" />
+          </div>
+          <div class="addcar-field full-row">
+            <label for="car-note">Note (optional)</label>
+            <input type="text" id="car-note" placeholder="e.g. Space for luggage" maxlength="80" />
+          </div>
+        </div>
+        <div class="error-msg" id="addcar-error" style="color:#b91c1c;font-size:0.82rem;margin-top:var(--sp-s);display:none"></div>
+        <div class="addcar-actions">
+          <button class="btn-addcar" id="save-car">Add car</button>
+          <button class="btn-cancel" id="cancel-car">Cancel</button>
+        </div>
       </div>
 
       <div class="stats-row fade-up" id="cars-stats"></div>
@@ -64,31 +166,101 @@
   <script src="../js/firebase-config.js"></script>
   <script src="../js/shared.js"></script>
   <script type="module">
-    import { getSession, saveChoices, onAllData } from '../js/db.js';
+    import { getSession, saveChoices, onAllData, onCars, addCar, removeCar } from '../js/db.js';
+
+    let demoCars = [];      // from cars.json
+    let userCars = [];      // from Firebase
+    let latestRegs = {}, latestChoices = {};
+    let session = null;
 
     async function init() {
       const { event, cars } = await loadAll();
+      demoCars = cars;
       renderNav(event.name);
       renderFooter();
       document.title = `Transport · ${event.name}`;
 
-      const session = getSession();
-      if (!session) document.getElementById('login-prompt').style.display = 'flex';
+      session = getSession();
+      if (!session) {
+        document.getElementById('login-prompt').style.display = 'flex';
+      } else {
+        document.getElementById('addcar-bar').style.display = 'flex';
+        setupAddCar();
+      }
 
-      onAllData((regs, choices) => render(cars, regs, choices, session));
+      // Live: registrations + choices
+      onAllData((regs, choices) => { latestRegs = regs; latestChoices = choices; render(); });
+      // Live: user-added cars
+      onCars(cars => { userCars = cars; render(); });
     }
 
-    function render(cars, regs, choices, session) {
-      const myChoice = session ? (choices[session.userId] || {}) : {};
+    function allCars() {
+      // Demo cars first, then user-added — sorted by departure time
+      return [...demoCars, ...userCars].sort((a, b) =>
+        (a.departure || '').localeCompare(b.departure || ''));
+    }
 
-      const totalBooked = new Set(
-        Object.values(choices).filter(c => c.carId).map((_, i) => Object.keys(choices)[i])
-      ).size;
+    function setupAddCar() {
+      const form = document.getElementById('addcar-form');
+      document.getElementById('toggle-addcar').addEventListener('click', () => {
+        form.classList.toggle('open');
+      });
+      document.getElementById('cancel-car').addEventListener('click', () => {
+        form.classList.remove('open');
+      });
+
+      document.getElementById('save-car').addEventListener('click', async () => {
+        const name      = document.getElementById('car-name').value.trim();
+        const capacity  = parseInt(document.getElementById('car-capacity').value, 10);
+        const departure = document.getElementById('car-departure').value;
+        const from      = document.getElementById('car-from').value.trim();
+        const note      = document.getElementById('car-note').value.trim();
+        const errEl     = document.getElementById('addcar-error');
+        errEl.style.display = 'none';
+
+        if (!name || !from || !capacity || capacity < 1) {
+          errEl.textContent = 'Please fill in a name, seats and a meeting point.';
+          errEl.style.display = 'block';
+          return;
+        }
+
+        const btn = document.getElementById('save-car');
+        btn.disabled = true; btn.textContent = 'Adding…';
+
+        try {
+          await addCar({
+            name, capacity,
+            departure: departure ? departure + ':00' : '',
+            from,
+            note: note || null,
+            ownerId: session.userId,
+            ownerName: session.name,
+          });
+          // Reset + close
+          document.getElementById('car-name').value = '';
+          document.getElementById('car-from').value = '';
+          document.getElementById('car-note').value = '';
+          form.classList.remove('open');
+        } catch (e) {
+          errEl.textContent = 'Could not add the car. Try again.';
+          errEl.style.display = 'block';
+          console.error(e);
+        } finally {
+          btn.disabled = false; btn.textContent = 'Add car';
+        }
+      });
+    }
+
+    function render() {
+      const cars    = allCars();
+      const regs    = latestRegs;
+      const choices = latestChoices;
+      const myChoice = session ? (choices[session.userId] || {}) : {};
 
       document.getElementById('cars-stats').innerHTML = `
         <div class="stat-box"><span class="stat-box__num">${cars.length}</span><span class="stat-box__label">Cars</span></div>
         <div class="stat-box"><span class="stat-box__num">${Object.values(choices).filter(c => c.carId).length}</span><span class="stat-box__label">Seated</span></div>
-        <div class="stat-box"><span class="stat-box__num">${cars.reduce((s,c) => s + c.capacity, 0)}</span><span class="stat-box__label">Total seats</span></div>
+        <div class="stat-box"><span class="stat-box__num">${cars.reduce((s,c) => s + (c.capacity||0), 0)}</span><span class="stat-box__label">Total seats</span></div>
       `;
 
       document.getElementById('cars-grid').innerHTML = cars.map(car => {
@@ -97,17 +269,19 @@
           .map(([uid]) => regs[uid]).filter(Boolean);
         const isFull = occupants.length >= car.capacity;
         const isMine = session && myChoice.carId === car.id;
+        const iOwn   = session && car.ownerId === session.userId;
 
         return `
           <div class="card car-card${isFull && !isMine ? ' full' : ''}${isMine ? ' mine' : ''}"
                data-car="${car.id}" data-full="${isFull && !isMine}"
-               title="${isFull && !isMine ? 'Car full' : isMine ? 'Your car — click to leave' : 'Click to join'}">
-            ${isMine ? '<span class="mine-badge">Your car ✓</span>' : ''}
+               title="${isFull && !isMine ? 'Car full' : isMine ? 'Your seat — click to leave' : 'Click to join'}">
+            ${isMine ? '<span class="mine-badge">You ride here ✓</span>' : ''}
             <div class="car-card__header">
               <span class="car-card__icon">🚗</span>
               <div>
                 <h3>${car.name}</h3>
                 <span class="badge badge--neutral">${occupants.length} / ${car.capacity} seats</span>
+                ${car.ownerName ? `<div class="owner-tag">Added by ${car.ownerName}</div>` : ''}
               </div>
             </div>
 
@@ -118,10 +292,11 @@
                   ${occupants.map(p => personChip(p)).join('') || '<span class="text-muted text-small">No one yet</span>'}
                 </div>
               </div>
+              ${car.departure ? `
               <div class="car-card__row">
                 <span class="car-card__row-label">Departs</span>
                 <span class="badge badge--teal font-mono">${formatDate(car.departure)} · ${formatTime(car.departure)}</span>
-              </div>
+              </div>` : ''}
               <div class="car-card__row">
                 <span class="car-card__row-label">From</span>
                 <span class="text-small" style="color:var(--c-text)">📍 ${car.from}</span>
@@ -137,16 +312,31 @@
               <div class="capacity-bar__fill${isFull ? ' full' : ''}"
                    style="width:${Math.min(100, (occupants.length / car.capacity) * 100)}%"></div>
             </div>
+
+            ${iOwn ? `<button class="btn-remove-car" data-remove="${car.id}">🗑 Remove my car</button>` : ''}
           </div>`;
       }).join('');
 
+      // Join / leave (click card, but not the remove button)
       if (session) {
         document.querySelectorAll('.car-card').forEach(card => {
-          card.addEventListener('click', async () => {
+          card.addEventListener('click', async (e) => {
+            if (e.target.closest('.btn-remove-car')) return;   // handled separately
             if (card.dataset.full === 'true') return;
             const carId   = card.dataset.car;
             const leaving = myChoice.carId === carId;
             await saveChoices(session.userId, { carId: leaving ? null : carId });
+          });
+        });
+
+        // Remove-my-car buttons
+        document.querySelectorAll('.btn-remove-car').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const carId = btn.dataset.remove;
+            if (confirm('Remove your car? Anyone who joined it will be un-seated.')) {
+              await removeCar(carId);
+            }
           });
         });
       }
