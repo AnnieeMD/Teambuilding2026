@@ -40,7 +40,8 @@
       font-weight: 600;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    input[type="password"] {
       width: 100%;
       padding: 10px 14px;
       border: 1px solid var(--c-border2);
@@ -53,7 +54,8 @@
       outline: none;
     }
 
-    input[type="text"]:focus {
+    input[type="text"]:focus,
+    input[type="password"]:focus {
       border-color: var(--c-teal);
       box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
     }
@@ -179,9 +181,18 @@
             <div class="emoji-grid" id="emoji-grid"></div>
           </div>
 
+          <div class="form-field">
+            <label for="password-input">Password <span style="text-transform:none;letter-spacing:0;font-weight:400">(min 4 characters)</span></label>
+            <input type="password" id="password-input" placeholder="Choose a password" maxlength="60" autocomplete="new-password" />
+          </div>
+
           <div class="error-msg" id="error-msg"></div>
 
           <button class="btn-primary" id="register-btn" disabled>Register →</button>
+
+          <div style="text-align:center;margin-top:var(--sp-m);font-size:0.85rem;color:var(--c-muted)">
+            Already registered? <a href="login.html" style="color:var(--c-teal-dim);font-weight:700">Log in →</a>
+          </div>
         </div>
       </div>
     </div>
@@ -222,6 +233,7 @@
       });
 
       document.getElementById('name-input').addEventListener('input', updateBtn);
+      document.getElementById('password-input').addEventListener('input', updateBtn);
 
       // Check existing session
       const session = getSession();
@@ -231,6 +243,7 @@
         clearSession();
         document.getElementById('already-in').style.display = 'none';
         document.getElementById('name-input').value = '';
+        document.getElementById('password-input').value = '';
         selectedEmoji = null;
         grid.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
         updateBtn();
@@ -241,7 +254,8 @@
 
     function updateBtn() {
       const name = document.getElementById('name-input').value.trim();
-      document.getElementById('register-btn').disabled = !name || !selectedEmoji;
+      const pw   = document.getElementById('password-input').value;
+      document.getElementById('register-btn').disabled = !name || !selectedEmoji || pw.length < 4;
     }
 
     function showAlreadyIn(session) {
@@ -252,10 +266,11 @@
 
     async function handleRegister() {
       const name = document.getElementById('name-input').value.trim();
+      const password = document.getElementById('password-input').value;
       const errEl = document.getElementById('error-msg');
       errEl.classList.remove('show');
 
-      if (!name || !selectedEmoji) return;
+      if (!name || !selectedEmoji || password.length < 4) return;
 
       // Check for duplicate name
       const existing = await getRegistrations();
@@ -263,7 +278,7 @@
         r => r.name.toLowerCase() === name.toLowerCase()
       );
       if (taken) {
-        errEl.textContent = `"${name}" is already registered. Is that you? Use the Switch button above if you want to re-register.`;
+        errEl.textContent = `"${name}" is already registered.`;
         errEl.classList.add('show');
         return;
       }
@@ -275,7 +290,7 @@
       try {
         // userId = sanitised lowercase name
         const userId = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-        await registerUser(userId, name, selectedEmoji);
+        await registerUser(userId, name, selectedEmoji, password);
 
         // Show success then redirect to home
         document.getElementById('register-card').innerHTML = `
