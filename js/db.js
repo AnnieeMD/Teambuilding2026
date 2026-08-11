@@ -30,14 +30,58 @@ export function clearSession() {
   localStorage.removeItem(SESSION_KEY);
 }
 
+/* ── Password hashing (SHA-256 via Web Crypto) ────────────────
+   We never store the raw password — only its hash. Note: with
+   public read rules the hashes are visible, so this stops casual
+   impersonation, not a determined attacker. Don't reuse a real
+   password here. */
+async function hashPassword(password) {
+  const data   = new TextEncoder().encode(password);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(digest))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 /* ── Registration ─────────────────────────────────────────── */
-export async function registerUser(userId, name, emoji) {
+export async function registerUser(userId, name, emoji, password) {
   await set(ref(db, `registrations/${userId}`), {
     name,
     emoji,
+    passwordHash: await hashPassword(password),
     registeredAt: new Date().toISOString(),
   });
   saveSession({ userId, name, emoji });
+}
+
+/* ── Login ────────────────────────────────────────────────────
+   Find the registration by name and verify the password against
+   the stored hash. Accounts created before passwords existed
+   (no passwordHash) are allowed in with name only, so nobody is
+   locked out. Return codes let the UI show the right message:
+     { ok: true, session }
+     { ok: false, reason: 'not_found' | 'wrong_password' } */
+export async function loginUser(name, password) {
+  const snap = await get(ref(db, 'registrations'));
+  const all  = snap.exists() ? snap.val() : {};
+  const wanted = name.trim().toLowerCase();
+
+  const match = Object.entries(all).find(
+    ([, reg]) => reg.name && reg.name.trim().toLowerCase() === wanted
+  );
+  if (!match) return { ok: false, reason: 'not_found' };
+
+  const [userId, reg] = match;
+
+  // Legacy account with no password set — allow name-only login.
+  if (reg.passwordHash) {
+    const attempt = await hashPassword(password || '');
+    if (attempt !== reg.passwordHash) return { ok: false, reason: 'wrong_password' };
+  }
+
+  const session = { userId, name: reg.name, emoji: reg.emoji };
+  saveSession(session);
+  return { ok: true, session };
 }
 
 /* Returns a snapshot of all registrations once */
