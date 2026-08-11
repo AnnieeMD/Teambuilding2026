@@ -64,7 +64,10 @@ function renderNav(eventName) {
         <span style="font-size:1rem">${session.emoji}</span>${session.name.split(' ')[0]}
       </span>`;
     } else {
-      sessionPill = `<a href="${prefix}pages/register.html" style="margin-left:var(--sp-s);padding:6px 14px;background:var(--g-accent);color:#fff;border-radius:var(--r-s);font-weight:700;font-size:0.8rem;white-space:nowrap">Register</a>`;
+      sessionPill = `<span style="display:inline-flex;align-items:center;gap:8px;margin-left:var(--sp-s)">
+        <a href="${prefix}pages/login.html" style="padding:6px 12px;background:none;border:1px solid var(--c-border2);color:var(--c-muted);border-radius:var(--r-s);font-weight:600;font-size:0.8rem;white-space:nowrap">Log in</a>
+        <a href="${prefix}pages/register.html" style="padding:6px 14px;background:var(--g-accent);color:#fff;border-radius:var(--r-s);font-weight:700;font-size:0.8rem;white-space:nowrap">Register</a>
+      </span>`;
     }
   } catch { /* ignore */ }
 
