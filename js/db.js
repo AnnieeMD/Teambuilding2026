@@ -4,12 +4,13 @@
   All writes use set/update for atomic operations.
 
   DB structure:
-  /registrations/{userId}  → { name, emoji, registeredAt }
-  /choices/{userId}        → { roomId, carId, diet, allergies, note }
+  /registrations/{userId}  → { name, emoji, passwordHash, registeredAt }
+  /choices/{userId}        → { roomId, carId, diet, allergyNote }
+  /cars/{carId}            → { id, name, capacity, departure, from, note, ownerId, ownerName, addedAt }
 */
 
 import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, set, update, remove, onValue, get }
+import { getDatabase, ref, set, update, remove, onValue, get, push }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 const app = initializeApp(FIREBASE_CONFIG);   // FIREBASE_CONFIG loaded from firebase-config.js
@@ -104,6 +105,38 @@ export async function saveChoices(userId, choices) {
    or wipe only the meal-related fields */
 export async function clearMealChoice(userId) {
   await update(ref(db, `choices/${userId}`), { diet: null, allergyNote: null });
+}
+
+/* ── User-added cars ──────────────────────────────────────────
+   Demo cars live in data/cars.json; these are cars volunteers add
+   live. Stored under /cars/{carId} with an ownerId so only the
+   person who added a car can remove it. */
+export async function addCar(car) {
+  // carId: stable, unique per push
+  const carId = push(ref(db, 'cars')).key;
+  await set(ref(db, `cars/${carId}`), { ...car, id: carId, addedAt: new Date().toISOString() });
+  return carId;
+}
+
+/* Remove a car and detach any passengers who had joined it. */
+export async function removeCar(carId) {
+  // Clear carId from anyone seated in it
+  const snap = await get(ref(db, 'choices'));
+  const choices = snap.exists() ? snap.val() : {};
+  const updates = {};
+  Object.entries(choices).forEach(([uid, c]) => {
+    if (c && c.carId === carId) updates[`choices/${uid}/carId`] = null;
+  });
+  updates[`cars/${carId}`] = null;
+  await update(ref(db), updates);
+}
+
+/* Live subscription to user-added cars → array (may be empty) */
+export function onCars(cb) {
+  return onValue(ref(db, 'cars'), snap => {
+    const val = snap.exists() ? snap.val() : {};
+    cb(Object.values(val));
+  });
 }
 
 export function onChoices(cb) {
