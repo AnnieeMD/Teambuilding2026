@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .login-wrap {
+      min-height: calc(100vh - var(--nav-h));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-l) var(--sp-m);
+    }
+
+    .login-card {
+      background: var(--c-surface2);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r-xl);
+      padding: var(--sp-l) var(--sp-xl);
+      box-shadow: var(--shadow-hover);
+      max-width: 440px;
+      width: 100%;
+    }
+
+    .login-card h2 { margin-bottom: 6px; }
+    .login-card .sub { color: var(--c-muted); font-size: 0.95rem; margin-bottom: var(--sp-l); }
+
+    .form-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--sp-m); }
+
+    label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--c-muted);
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--c-border2);
+      border-radius: var(--r-s);
+      background: var(--c-bg);
+      color: var(--c-heading);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: var(--c-teal);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: var(--g-accent);
+      color: #fff;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      border-radius: var(--r-m);
+      cursor: pointer;
+      transition: opacity var(--t-fast), transform var(--t-fast);
+      margin-top: var(--sp-s);
+    }
+
+    .btn-primary:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .already-in {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-m);
+      padding: var(--sp-m);
+      background: rgba(13,148,136,0.06);
+      border: 1px solid rgba(13,148,136,0.2);
+      border-radius: var(--r-m);
+      margin-bottom: var(--sp-m);
+    }
+
+    .already-in__name { font-weight: 700; color: var(--c-heading); }
+    .already-in__sub  { font-size: 0.82rem; color: var(--c-muted); }
+
+    .btn-secondary {
+      padding: 8px 16px;
+      background: none;
+      border: 1px solid var(--c-border2);
+      border-radius: var(--r-s);
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--c-muted);
+      font-family: var(--font-body);
+      transition: border-color var(--t-fast), color var(--t-fast);
+      white-space: nowrap;
+    }
+    .btn-secondary:hover { border-color: var(--c-teal); color: var(--c-teal-dim); }
+
+    .error-msg {
+      color: #b91c1c;
+      font-size: 0.82rem;
+      background: rgba(220,38,38,0.07);
+      border: 1px solid rgba(220,38,38,0.15);
+      border-radius: var(--r-s);
+      padding: 8px 12px;
+      display: none;
+      margin-bottom: var(--sp-s);
+    }
+    .error-msg.show { display: block; }
+
+    .error-msg a { color: var(--c-teal-dim); font-weight: 700; }
+
+    .success-msg {
+      text-align: center;
+      padding: var(--sp-l) 0;
+    }
+    .success-msg .big-emoji { font-size: 4rem; display: block; margin-bottom: var(--sp-s); }
+
+    .foot-link {
+      text-align: center;
+      margin-top: var(--sp-m);
+      font-size: 0.85rem;
+      color: var(--c-muted);
+    }
+    .foot-link a { color: var(--c-teal-dim); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <div class="page">
+    <div class="login-wrap">
+      <div class="login-card fade-up" id="login-card">
+        <h2 class="gradient-text">Welcome back</h2>
+        <p class="sub">Enter the name you registered with to log back in on this device.</p>
+
+        <!-- Already logged in banner (shown if session exists) -->
+        <div class="already-in" id="already-in" style="display:none">
+          <span id="already-emoji" style="font-size:2rem"></span>
+          <div>
+            <div class="already-in__name" id="already-name"></div>
+            <div class="already-in__sub">You're already logged in. Not you?</div>
+          </div>
+          <button class="btn-secondary" id="switch-btn">Log out</button>
+        </div>
+
+        <!-- Login form -->
+        <div id="login-form">
+          <div class="form-field">
+            <label for="name-input">Your name</label>
+            <input type="text" id="name-input" placeholder="e.g. Ani Dermendzhieva" maxlength="40" autocomplete="off" />
+          </div>
+
+          <div class="form-field">
+            <label for="password-input">Password</label>
+            <input type="password" id="password-input" placeholder="Your password" maxlength="60" autocomplete="current-password" />
+          </div>
+
+          <div class="error-msg" id="error-msg"></div>
+
+          <button class="btn-primary" id="login-btn" disabled>Log in →</button>
+
+          <div class="foot-link">
+            New here? <a href="register.html">Register instead →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/shared.js"></script>
+  <script type="module">
+    import { loginUser, getSession, clearSession } from '../js/db.js';
+
+    async function init() {
+      const { event } = await loadAll();
+      renderNav(event.name);
+      renderFooter();
+      document.title = `Log in · ${event.name}`;
+
+      const nameInput = document.getElementById('name-input');
+      const pwInput   = document.getElementById('password-input');
+      nameInput.addEventListener('input', updateBtn);
+      pwInput.addEventListener('input', updateBtn);
+      const onEnter = e => {
+        if (e.key === 'Enter' && !document.getElementById('login-btn').disabled) handleLogin();
+      };
+      nameInput.addEventListener('keydown', onEnter);
+      pwInput.addEventListener('keydown', onEnter);
+
+      // Existing session?
+      const session = getSession();
+      if (session) showAlreadyIn(session);
+
+      document.getElementById('switch-btn').addEventListener('click', () => {
+        clearSession();
+        document.getElementById('already-in').style.display = 'none';
+        nameInput.value = '';
+        updateBtn();
+      });
+
+      document.getElementById('login-btn').addEventListener('click', handleLogin);
+    }
+
+    function updateBtn() {
+      const name = document.getElementById('name-input').value.trim();
+      document.getElementById('login-btn').disabled = !name;
+    }
+
+    function showAlreadyIn(session) {
+      document.getElementById('already-in').style.display = 'flex';
+      document.getElementById('already-emoji').textContent = session.emoji;
+      document.getElementById('already-name').textContent  = session.name;
+    }
+
+    async function handleLogin() {
+      const name  = document.getElementById('name-input').value.trim();
+      const password = document.getElementById('password-input').value;
+      const errEl = document.getElementById('error-msg');
+      errEl.classList.remove('show');
+      if (!name) return;
+
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true;
+      btn.textContent = 'Checking…';
+
+      try {
+        const result = await loginUser(name, password);
+
+        if (!result.ok) {
+          btn.disabled = false;
+          btn.textContent = 'Log in →';
+          if (result.reason === 'wrong_password') {
+            errEl.textContent = 'Wrong password. Try again.';
+          } else {
+            errEl.innerHTML = `No one is registered under "${name}". Check the spelling, or <a href="register.html">register instead →</a>`;
+          }
+          errEl.classList.add('show');
+          return;
+        }
+
+        const session = result.session;
+
+        // Success → show welcome, then offer to continue
+        document.getElementById('login-card').innerHTML = `
+          <div class="success-msg fade-up">
+            <span class="big-emoji">${session.emoji}</span>
+            <h2 class="gradient-text">Welcome back, ${session.name.split(' ')[0]}!</h2>
+            <p style="margin-top:var(--sp-s)">You're logged in on this device.</p>
+            <a href="schedule.html" style="display:inline-block;margin-top:var(--sp-m);padding:10px 28px;background:var(--g-accent);color:#fff;border-radius:var(--r-m);font-weight:700;">View the schedule →</a>
+          </div>`;
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = 'Log in →';
+        errEl.textContent = 'Something went wrong. Check your connection and try again.';
+        errEl.classList.add('show');
+        console.error(e);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
