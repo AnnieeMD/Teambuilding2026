@@ -91,16 +91,13 @@
     }
 
     function render(rooms, regs, choices, session) {
-      // Stats
-      const filled = rooms.filter(r => {
-        const count = Object.values(choices).filter(c => c.roomId === r.number).length;
-        return count >= r.capacity;
-      }).length;
+      const filled    = rooms.filter(r => Object.values(choices).filter(c => c.roomId === r.number).length >= r.capacity).length;
+      const seated    = Object.values(choices).filter(c => c.roomId).length;
 
       document.getElementById('rooms-stats').innerHTML = `
-        <div class="stat-box"><span class="stat-box__num">${rooms.length}</span><span class="stat-box__label">Rooms</span></div>
         <div class="stat-box"><span class="stat-box__num">${rooms.length - filled}</span><span class="stat-box__label">Available</span></div>
-        <div class="stat-box"><span class="stat-box__num">${Object.keys(choices).length}</span><span class="stat-box__label">Booked</span></div>
+        <div class="stat-box"><span class="stat-box__num">${filled}</span><span class="stat-box__label">Full</span></div>
+        <div class="stat-box"><span class="stat-box__num">${seated}</span><span class="stat-box__label">People in</span></div>
       `;
 
       // My current room
@@ -123,9 +120,11 @@
             <div class="room-card__header">
               <div>
                 <div class="room-name">${room.name}</div>
-                <div class="room-type-floor">${room.type} · ${room.floor}</div>
+                <div class="room-type-floor">
+                  <span style="font-weight:600;color:${room.capacity === 1 ? '#7c3aed' : 'var(--c-teal-dim)'}">${room.type}</span>
+                  · <span style="color:var(--c-muted)">${room.capacity} person${room.capacity > 1 ? 's' : ''}</span>
+                </div>
               </div>
-              <span class="room-number">${room.number}</span>
             </div>
             <div class="divider"></div>
             <div class="chips" style="min-height:30px">
