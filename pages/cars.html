@@ -138,7 +138,7 @@
           </div>
           <div class="addcar-field">
             <label for="car-departure">Departure time</label>
-            <input type="datetime-local" id="car-departure" value="2026-10-02T10:00" />
+            <input type="time" id="car-departure" value="10:00" />
           </div>
           <div class="addcar-field full-row">
             <label for="car-from">Meeting point</label>
@@ -230,7 +230,7 @@
         try {
           await addCar({
             name, capacity,
-            departure: departure ? departure + ':00' : '',
+            departure: departure || '',
             from,
             note: note || null,
             ownerId: session.userId,
@@ -281,21 +281,28 @@
               <div>
                 <h3>${car.name}</h3>
                 <span class="badge badge--neutral">${occupants.length} / ${car.capacity} seats</span>
-                ${car.ownerName ? `<div class="owner-tag">Added by ${car.ownerName}</div>` : ''}
               </div>
             </div>
 
             <div class="car-card__meta">
+              ${car.ownerName ? `
               <div class="car-card__row">
-                <span class="car-card__row-label">People</span>
+                <span class="car-card__row-label">Driver</span>
+                <span class="text-small" style="color:var(--c-text);font-weight:600">🚗 ${car.ownerName}${session && car.ownerId === session.userId ? ' <span style="font-size:0.7rem;color:var(--c-teal-dim)">(you)</span>' : ''}</span>
+              </div>` : ''}
+              <div class="car-card__row">
+                <span class="car-card__row-label">Passengers</span>
                 <div class="chips">
-                  ${occupants.map(p => personChip(p)).join('') || '<span class="text-muted text-small">No one yet</span>'}
+                  ${occupants.filter(p => {
+                      const uid = Object.entries(regs).find(([,r]) => r === p)?.[0];
+                      return uid !== car.ownerId;
+                    }).map(p => personChip(p)).join('') || '<span class="text-muted text-small">No passengers yet</span>'}
                 </div>
               </div>
               ${car.departure ? `
               <div class="car-card__row">
                 <span class="car-card__row-label">Departs</span>
-                <span class="badge badge--teal font-mono">${formatDate(car.departure)} · ${formatTime(car.departure)}</span>
+                <span class="badge badge--teal font-mono">${formatTime(car.departure)}</span>
               </div>` : ''}
               <div class="car-card__row">
                 <span class="car-card__row-label">From</span>
