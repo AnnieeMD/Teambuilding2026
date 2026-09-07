@@ -145,8 +145,11 @@ function formatDate(iso) {
   return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
-function formatTime(iso) {
-  const d = new Date(iso);
+function formatTime(val) {
+  if (!val) return '';
+  // Plain HH:MM from <input type="time">
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(val)) return val.slice(0, 5);
+  const d = new Date(val);
   return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 
