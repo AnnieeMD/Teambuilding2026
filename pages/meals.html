@@ -3,73 +3,175 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Meals</title>
+  <title>Dinner Vote</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/style.css" />
   <style>
-    .meal-option {
-      display: flex; align-items: center; gap: var(--sp-m);
-      padding: var(--sp-m) var(--sp-l);
+    /* ── Menu vote cards ─────────────────────────────────── */
+    .menu-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--sp-l);
+      margin-bottom: var(--sp-xl);
+    }
+
+    .menu-card {
       background: var(--c-surface2);
       border: 2px solid var(--c-border);
-      border-radius: var(--r-l);
+      border-radius: var(--r-xl);
+      padding: var(--sp-l);
       cursor: pointer;
       transition: border-color var(--t-mid), box-shadow var(--t-mid), transform var(--t-mid);
       box-shadow: var(--shadow-card);
+      position: relative;
     }
-    .meal-option:hover { border-color: rgba(13,148,136,0.35); transform: translateY(-2px); }
-    .meal-option.selected {
+    .menu-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+    #card-a:hover { border-color: rgba(14,165,233,0.45); }
+    #card-b:hover { border-color: rgba(5,150,105,0.45); }
+    #card-either:hover { border-color: rgba(168,85,247,0.45); }
+    .menu-card.selected {
       border-color: var(--c-teal);
-      box-shadow: 0 0 0 3px rgba(13,148,136,0.12), var(--shadow-hover);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.15), var(--shadow-hover);
     }
-    .meal-option__icon { font-size: 2.2rem; flex-shrink: 0; }
-    .meal-option__title { font-weight: 700; color: var(--c-heading); font-size: 1rem; }
-    .meal-option__sub   { font-size: 0.82rem; color: var(--c-muted); }
-    .meal-options-grid  { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--sp-m); margin-bottom: var(--sp-l); }
+    .menu-card.either-card.selected {
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(168,85,247,0.15), var(--shadow-hover);
+    }
 
-    .meal-form {
+    .menu-card__badge {
+      display: inline-block;
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 3px 10px; border-radius: 99px;
+      margin-bottom: var(--sp-s);
+    }
+    .badge-a { background: rgba(14,165,233,0.12); color: #0ea5e9; }
+    .badge-b { background: rgba(16,185,129,0.12); color: #059669; }
+    .badge-either { background: rgba(168,85,247,0.12); color: #a855f7; }
+
+    .menu-card__title { font-size: 1.15rem; font-weight: 800; color: var(--c-heading); margin-bottom: var(--sp-s); }
+    .menu-card__sub   { font-size: 0.82rem; color: var(--c-muted); margin-bottom: var(--sp-m); }
+
+    .menu-items { list-style: none; padding: 0; margin: 0; }
+    .menu-items li {
+      font-size: 0.83rem; color: var(--c-text);
+      padding: 4px 0;
+      border-bottom: 1px solid var(--c-border);
+      display: flex; align-items: flex-start; gap: 6px;
+    }
+    .menu-items li:last-child { border-bottom: none; }
+    .menu-items li::before { content: "•"; color: var(--c-teal); flex-shrink: 0; }
+
+    .menu-section-label {
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--c-muted);
+      margin: var(--sp-s) 0 4px;
+    }
+
+    .check-mark {
+      position: absolute; top: 14px; right: 14px;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--c-teal); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .menu-card.selected .check-mark { opacity: 1; }
+    .either-card.selected .check-mark { background: #a855f7; }
+
+    /* ── Vote bar ─────────────────────────────────────────── */
+    .vote-results {
       background: var(--c-surface2);
       border: 1px solid var(--c-border);
-      border-radius: var(--r-l);
-      padding: var(--sp-m) var(--sp-l);
+      border-radius: var(--r-xl);
+      padding: var(--sp-l);
       box-shadow: var(--shadow-card);
-      max-width: 480px;
+      margin-bottom: var(--sp-xl);
+    }
+    .vote-results h3 { margin-bottom: var(--sp-m); }
+
+    .vote-bar-row {
+      display: flex; align-items: center; gap: var(--sp-m);
+      margin-bottom: var(--sp-s);
+    }
+    .vote-bar-label { min-width: 80px; font-weight: 700; font-size: 0.9rem; color: var(--c-heading); }
+    .vote-bar-track {
+      flex: 1; height: 12px; border-radius: 99px;
+      background: var(--c-bg2); overflow: hidden;
+    }
+    .vote-bar-fill {
+      height: 100%; border-radius: 99px;
+      transition: width 0.6s ease;
+    }
+    .fill-a      { background: linear-gradient(90deg, #0ea5e9, #38bdf8); }
+    .fill-b      { background: linear-gradient(90deg, #059669, #34d399); }
+    .fill-either { background: linear-gradient(90deg, #a855f7, #c084fc); }
+
+    .vote-bar-count { min-width: 32px; text-align: right; font-size: 0.85rem; color: var(--c-muted); font-weight: 600; }
+
+    .winner-banner {
+      display: flex; align-items: center; gap: var(--sp-s);
+      background: rgba(13,148,136,0.06); border: 1px solid rgba(13,148,136,0.2);
+      border-radius: var(--r-m); padding: var(--sp-s) var(--sp-m);
+      font-size: 0.88rem; font-weight: 600; color: var(--c-teal-dim);
+      margin-top: var(--sp-m);
+    }
+
+    /* ── Voters list ───────────────────────────────────────── */
+    .voters-section { margin-bottom: var(--sp-xl); }
+    .voters-group { margin-bottom: var(--sp-l); }
+    .voters-group__title {
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--c-muted); margin-bottom: var(--sp-s);
+    }
+
+    /* ── Login prompt ─────────────────────────────────────── */
+    .not-registered {
+      background: rgba(217,119,6,0.07);
+      border: 1px solid rgba(217,119,6,0.2);
+      border-radius: var(--r-m);
+      padding: var(--sp-m) var(--sp-l);
       margin-bottom: var(--sp-l);
+      display: flex; align-items: center; gap: var(--sp-m);
     }
 
-    .meal-form textarea {
-      width: 100%; padding: 10px 14px;
-      border: 1px solid var(--c-border2); border-radius: var(--r-s);
-      background: var(--c-bg); color: var(--c-heading);
-      font-family: var(--font-body); font-size: 0.9rem;
-      resize: vertical; min-height: 60px; outline: none;
-      transition: border-color var(--t-fast), box-shadow var(--t-fast);
-    }
-    .meal-form textarea:focus {
-      border-color: var(--c-teal);
-      box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
-    }
-
+    /* ── Save controls ───────────────────────────────────── */
+    .save-row { display: flex; align-items: center; gap: var(--sp-m); margin-top: var(--sp-l); }
     .btn-save {
       padding: 10px 28px;
       background: var(--g-accent); color: #fff;
       font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
       border: none; border-radius: var(--r-m); cursor: pointer;
       transition: opacity var(--t-fast), transform var(--t-fast);
-      margin-top: var(--sp-s);
     }
     .btn-save:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
     .btn-save:disabled { opacity: 0.45; cursor: not-allowed; }
-
-    .save-status { font-size: 0.82rem; color: var(--c-teal-dim); margin-left: var(--sp-s); opacity: 0; transition: opacity 0.3s; }
+    .save-status { font-size: 0.82rem; color: var(--c-teal-dim); opacity: 0; transition: opacity 0.3s; }
     .save-status.show { opacity: 1; }
 
-    .not-registered {
-      background: rgba(217,119,6,0.07); border: 1px solid rgba(217,119,6,0.2);
-      border-radius: var(--r-m); padding: var(--sp-m) var(--sp-l);
-      margin-bottom: var(--sp-l); display: flex; align-items: center; gap: var(--sp-m);
+    /* ── Allergy note ─────────────────────────────────────── */
+    .allergy-wrap {
+      max-width: 480px; margin-top: var(--sp-m);
+    }
+    .allergy-wrap label {
+      font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--c-muted); font-weight: 600; display: block; margin-bottom: 6px;
+    }
+    .allergy-wrap textarea {
+      width: 100%; padding: 10px 14px;
+      border: 1px solid var(--c-border2); border-radius: var(--r-s);
+      background: var(--c-bg); color: var(--c-heading);
+      font-family: var(--font-body); font-size: 0.9rem;
+      resize: vertical; min-height: 55px; outline: none;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
+    }
+    .allergy-wrap textarea:focus {
+      border-color: var(--c-teal);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
     }
   </style>
 </head>
@@ -79,45 +181,146 @@
   <div class="page">
     <div class="container">
       <div class="page-header fade-up">
-        <p class="page-header__eyebrow">What everyone eats</p>
-        <h1>🍽️ Meals & Diet</h1>
+        <p class="page-header__eyebrow">Mehana Bai Kotse · Oct 2, dinner</p>
+        <h1>🍽️ Dinner Menu Vote</h1>
+        <p style="color:var(--c-muted);margin-top:var(--sp-s)">
+          The restaurant prepared two menus for our group. Food will be served on large sharing platters
+          (one per table of 6). Vote for your preference — or pick <em>Either</em> if you're happy with both.
+        </p>
       </div>
 
+      <!-- Login prompt (not logged in) -->
       <div id="login-prompt" class="not-registered" style="display:none">
         <span style="font-size:1.5rem">👋</span>
-        <div><strong>Register or log in to set your meal.</strong>
-          <span class="text-muted text-small"> You can still see everyone's choices.</span></div>
+        <div>
+          <strong>Register or log in to cast your vote.</strong>
+          <span class="text-muted text-small"> You can still see the results below.</span>
+        </div>
         <span style="margin-left:auto;display:inline-flex;gap:8px">
           <a href="login.html" style="padding:8px 16px;background:none;border:1px solid var(--c-border2);color:var(--c-muted);border-radius:var(--r-s);font-weight:600;font-size:0.875rem;white-space:nowrap">Log in</a>
           <a href="register.html" style="padding:8px 18px;background:var(--g-accent);color:#fff;border-radius:var(--r-s);font-weight:700;font-size:0.875rem;white-space:nowrap">Register →</a>
         </span>
       </div>
 
-      <!-- Meal picker (only shown when registered) -->
-      <div id="meal-picker" style="display:none">
-        <div class="section__header">
-          <h2 class="section__title"><span>✋</span> Your choice</h2>
+      <!-- Menu vote cards (always visible) -->
+      <div class="menu-cards fade-up" id="menu-cards">
+
+        <!-- Menu A -->
+        <div class="menu-card" id="card-a" data-vote="a">
+          <div class="check-mark">✓</div>
+          <span class="menu-card__badge badge-a">Menu A</span>
+          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:var(--sp-s)">
+            <span style="font-size:1.6rem;font-weight:800;color:#0ea5e9">~842 €</span>
+            <span style="font-size:0.85rem;color:var(--c-muted);font-weight:600">~28 € / човек</span>
+          </div>
+          <div class="menu-card__sub">Без алкохол</div>
+
+          <div class="menu-section-label">Салати и предястия</div>
+          <ul class="menu-items">
+            <li>Салата "Бай Коце"</li>
+            <li>Разядката на шефа</li>
+            <li>Картофи Бай Коце</li>
+            <li>Запечено сирене с мед</li>
+            <li>Манатарки в масло</li>
+          </ul>
+
+          <div class="menu-section-label">Основни ястия</div>
+          <ul class="menu-items">
+            <li>Свински джолан</li>
+            <li>Телешки ребра</li>
+            <li>Свински шиш</li>
+            <li>Пилешки шиш</li>
+            <li>Свинско кюфте</li>
+            <li>Бански суджук на скара</li>
+          </ul>
+
+          <div class="menu-section-label">Хляб и вода</div>
+          <ul class="menu-items">
+            <li>Пърленка с кашкавал</li>
+            <li>Чеснова пърленка</li>
+            <li>Минерална вода</li>
+          </ul>
         </div>
-        <div class="meal-options-grid" id="meal-options"></div>
-        <div class="meal-form" id="meal-form">
-          <div class="form-field" style="display:flex;flex-direction:column;gap:6px;margin-bottom:var(--sp-s)">
-            <label style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--c-muted);font-weight:600">
-              Allergies / dietary notes (optional)
-            </label>
-            <textarea id="allergy-input" placeholder="e.g. gluten-free, no nuts, halal…"></textarea>
+
+        <!-- Menu B -->
+        <div class="menu-card" id="card-b" data-vote="b">
+          <div class="check-mark">✓</div>
+          <span class="menu-card__badge badge-b">Menu B</span>
+          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:var(--sp-s)">
+            <span style="font-size:1.6rem;font-weight:800;color:#059669">~1 056 €</span>
+            <span style="font-size:0.85rem;color:var(--c-muted);font-weight:600">~35 € / човек</span>
           </div>
-          <div style="display:flex;align-items:center">
-            <button class="btn-save" id="save-btn" disabled>Save preferences</button>
-            <span class="save-status" id="save-status">✓ Saved</span>
+          <div class="menu-card__sub">Без алкохол</div>
+
+          <div class="menu-section-label">Салати и предястия</div>
+          <ul class="menu-items">
+            <li>Салата "Бай Коце"</li>
+            <li>Разядката на шефа</li>
+            <li>Картофи Бай Коце</li>
+            <li>Запечен кашкавал</li>
+            <li>Манатарки в масло</li>
+          </ul>
+
+          <div class="menu-section-label">Основни ястия</div>
+          <ul class="menu-items">
+            <li>Бански сач</li>
+            <li>Агнешко джоланче</li>
+            <li>Свински шиш</li>
+            <li>Телешки шиш</li>
+            <li>Банска кървавица</li>
+            <li>Свински ребра</li>
+          </ul>
+
+          <div class="menu-section-label">Хляб, десерти и вода</div>
+          <ul class="menu-items">
+            <li>Пърленка с кашкавал</li>
+            <li>Чеснова пърленка</li>
+            <li>Баница с локум</li>
+            <li>Домашна торта</li>
+            <li>Минерална вода</li>
+          </ul>
+        </div>
+
+        <!-- Either -->
+        <div class="menu-card either-card" id="card-either" data-vote="either">
+          <div class="check-mark">✓</div>
+          <span class="menu-card__badge badge-either">Either is fine</span>
+          <div class="menu-card__title">I'm happy with both!</div>
+          <div class="menu-card__sub">
+            You don't have a preference. Your vote will be counted as half a point for
+            each menu — helping decide a tie.
           </div>
+          <div style="font-size:3rem;text-align:center;padding:var(--sp-l) 0">🤷</div>
+        </div>
+
+      </div>
+
+      <!-- Allergy / dietary note (logged-in only) -->
+      <div id="allergy-section" style="display:none">
+        <div class="allergy-wrap">
+          <label for="allergy-input">Allergies / dietary notes (optional)</label>
+          <textarea id="allergy-input" placeholder="e.g. no nuts, vegetarian, halal…"></textarea>
+        </div>
+
+        <div class="save-row">
+          <button class="btn-save" id="save-btn" disabled>Save my vote</button>
+          <span class="save-status" id="save-status">✓ Saved</span>
         </div>
       </div>
 
-      <!-- Summary -->
-      <div class="section__header fade-up">
-        <h2 class="section__title"><span>👥</span> Everyone's choices</h2>
+      <!-- Live results -->
+      <div class="vote-results fade-up" id="vote-results" style="margin-top:var(--sp-xl)">
+        <h3 class="gradient-text">📊 Results</h3>
+        <div id="vote-bars">
+          <div style="color:var(--c-muted);font-size:0.9rem">No votes yet.</div>
+        </div>
       </div>
-      <div class="meals-grid" id="meals-grid"></div>
+
+      <!-- Who voted what -->
+      <div class="section__header fade-up">
+        <h2 class="section__title"><span>👥</span> Everyone's votes</h2>
+      </div>
+      <div class="voters-section" id="voters-section"></div>
     </div>
   </div>
 
@@ -128,97 +331,137 @@
   <script type="module">
     import { getSession, saveChoices, onAllData } from '../js/db.js';
 
-    const DIET_OPTIONS = [
-      { id: 'meat',       label: 'Meat',        icon: '🍖', desc: 'Full omnivore menu' },
-      { id: 'fish',       label: 'Fish',         icon: '🐟', desc: 'Seafood option' },
-      { id: 'vegetarian', label: 'Vegetarian',   icon: '🥗', desc: 'No meat or fish' },
-      { id: 'vegan',      label: 'Vegan',        icon: '🌱', desc: 'Fully plant-based' },
-    ];
-
-    let selectedDiet = null;
+    let selectedVote  = null; // 'a' | 'b' | 'either'
+    let session       = null;
 
     async function init() {
       const { event } = await loadAll();
       renderNav(event.name);
       renderFooter();
-      document.title = `Meals · ${event.name}`;
+      document.title = `Dinner Vote · ${event.name}`;
 
-      const session = getSession();
+      session = getSession();
 
       if (!session) {
         document.getElementById('login-prompt').style.display = 'flex';
+        // Cards still visible but clicking them does nothing useful
       } else {
-        document.getElementById('meal-picker').style.display = 'block';
-        setupPicker(session);
+        document.getElementById('allergy-section').style.display = 'block';
+        setupCards();
+        setupSave();
       }
 
-      onAllData((regs, choices) => renderSummary(regs, choices, session));
+      onAllData((regs, choices) => renderResults(regs, choices));
     }
 
-    function setupPicker(session) {
-      const grid = document.getElementById('meal-options');
-      grid.innerHTML = DIET_OPTIONS.map(o => `
-        <div class="meal-option" data-diet="${o.id}">
-          <span class="meal-option__icon">${o.icon}</span>
-          <div>
-            <div class="meal-option__title">${o.label}</div>
-            <div class="meal-option__sub">${o.desc}</div>
-          </div>
-        </div>`).join('');
-
-      grid.querySelectorAll('.meal-option').forEach(el => {
-        el.addEventListener('click', () => {
-          grid.querySelectorAll('.meal-option').forEach(e => e.classList.remove('selected'));
-          el.classList.add('selected');
-          selectedDiet = el.dataset.diet;
+    function setupCards() {
+      document.querySelectorAll('.menu-card').forEach(card => {
+        card.addEventListener('click', () => {
+          selectedVote = card.dataset.vote;
+          document.querySelectorAll('.menu-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
           document.getElementById('save-btn').disabled = false;
         });
       });
+    }
 
+    function setupSave() {
       document.getElementById('save-btn').addEventListener('click', async () => {
-        if (!selectedDiet) return;
+        if (!selectedVote || !session) return;
         const btn = document.getElementById('save-btn');
-        btn.disabled = true;
-        btn.textContent = 'Saving…';
+        btn.disabled = true; btn.textContent = 'Saving…';
 
-        const allergies = document.getElementById('allergy-input').value.trim();
-        await saveChoices(session.userId, { diet: selectedDiet, allergyNote: allergies });
+        const allergyNote = document.getElementById('allergy-input').value.trim();
+        await saveChoices(session.userId, { diet: selectedVote, allergyNote: allergyNote || null });
 
-        btn.textContent = 'Save preferences';
+        btn.textContent = 'Save my vote';
         const status = document.getElementById('save-status');
         status.classList.add('show');
         setTimeout(() => status.classList.remove('show'), 2500);
       });
     }
 
-    function renderSummary(regs, choices, session) {
-      const entries = Object.entries(regs).map(([uid, reg]) => ({
-        uid, ...reg, ...(choices[uid] || {})
-      })).filter(e => e.diet);
-
-      // Pre-select my own saved choice in picker
-      if (session && choices[session.userId]?.diet) {
+    function renderResults(regs, choices) {
+      // Pre-fill my saved vote
+      if (session && choices[session.userId]?.diet && selectedVote !== choices[session.userId].diet) {
         const saved = choices[session.userId].diet;
-        if (selectedDiet !== saved) {
-          selectedDiet = saved;
-          document.querySelectorAll('.meal-option').forEach(el => {
-            el.classList.toggle('selected', el.dataset.diet === saved);
-          });
-          document.getElementById('allergy-input').value = choices[session.userId].allergyNote || '';
-          document.getElementById('save-btn').disabled = false;
-        }
+        selectedVote = saved;
+        document.querySelectorAll('.menu-card').forEach(c => {
+          c.classList.toggle('selected', c.dataset.vote === saved);
+        });
+        const allergyVal = choices[session.userId].allergyNote || '';
+        const allergyEl = document.getElementById('allergy-input');
+        if (allergyEl) allergyEl.value = allergyVal;
+        document.getElementById('save-btn').disabled = false;
       }
 
-      // Cards — one per person who has chosen
-      document.getElementById('meals-grid').innerHTML = entries.map(e => `
-        <div class="meal-card" style="${session && e.uid === session.userId ? 'border-color:var(--c-teal)' : ''}">
-          <span class="avatar" style="font-size:1.4rem">${e.emoji}</span>
-          <div class="meal-card__info">
-            <div class="meal-card__name">${e.name}${session && e.uid === session.userId ? ' <span style="font-size:0.7rem;color:var(--c-teal-dim)">(you)</span>' : ''}</div>
-            <div class="mt-s">${dietBadge(e.diet)}</div>
-            ${e.allergyNote ? `<div class="mt-s"><span class="allergy-tag">⚠ ${e.allergyNote}</span></div>` : ''}
+      // Tally votes
+      const voted = Object.entries(choices)
+        .filter(([, c]) => c && c.diet)
+        .map(([uid, c]) => ({ uid, vote: c.diet, allergyNote: c.allergyNote, ...(regs[uid] || {}) }));
+
+      const countA      = voted.filter(v => v.vote === 'a').length;
+      const countB      = voted.filter(v => v.vote === 'b').length;
+      const countEither = voted.filter(v => v.vote === 'either').length;
+      const total       = countA + countB + countEither;
+
+      // Score with either worth 1 each
+      const scoreA = countA + countEither;
+      const scoreB = countB + countEither;
+
+      // Bar chart
+      const barContainer = document.getElementById('vote-bars');
+      if (total === 0) {
+        barContainer.innerHTML = '<div style="color:var(--c-muted);font-size:0.9rem">No votes yet — be the first!</div>';
+      } else {
+        const maxScore = Math.max(scoreA, scoreB, countEither, 1);
+
+        let winner = '';
+        if (scoreA > scoreB)      winner = `Menu A is leading 🎉`;
+        else if (scoreB > scoreA) winner = `Menu B is leading 🎉`;
+        else if (total > 0)       winner = `It's a tie — more votes needed!`;
+
+        barContainer.innerHTML = `
+          <div class="vote-bar-row">
+            <div class="vote-bar-label">Menu A</div>
+            <div class="vote-bar-track"><div class="vote-bar-fill fill-a" style="width:${(scoreA/maxScore)*100}%"></div></div>
+            <div class="vote-bar-count">${scoreA}</div>
           </div>
-        </div>`).join('');
+          <div class="vote-bar-row">
+            <div class="vote-bar-label">Menu B</div>
+            <div class="vote-bar-track"><div class="vote-bar-fill fill-b" style="width:${(scoreB/maxScore)*100}%"></div></div>
+            <div class="vote-bar-count">${scoreB}</div>
+          </div>
+          <div class="vote-bar-row">
+            <div class="vote-bar-label">Either</div>
+            <div class="vote-bar-track"><div class="vote-bar-fill fill-either" style="width:${(countEither/maxScore)*100}%"></div></div>
+            <div class="vote-bar-count">${countEither}</div>
+          </div>
+          ${winner ? `<div class="winner-banner">🏆 ${winner}</div>` : ''}
+        `;
+      }
+
+      // Who voted what
+      const groups = [
+        { key: 'a',      label: '🔵 Menu A',   people: voted.filter(v => v.vote === 'a') },
+        { key: 'b',      label: '🟢 Menu B',        people: voted.filter(v => v.vote === 'b') },
+        { key: 'either', label: '🟣 Either is fine',                  people: voted.filter(v => v.vote === 'either') },
+      ];
+
+      document.getElementById('voters-section').innerHTML = groups.map(g => {
+        if (!g.people.length) return '';
+        return `
+          <div class="voters-group">
+            <div class="voters-group__title">${g.label} (${g.people.length})</div>
+            <div class="chips">
+              ${g.people.map(p => `
+                <span class="chip${session && p.uid === session.userId ? ' chip--me' : ''}" style="display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px">
+                  <span>${p.emoji || '👤'} ${p.name || '?'}${session && p.uid === session.userId ? '<span style="font-size:0.65rem;opacity:0.7"> (you)</span>' : ''}</span>
+                  ${p.allergyNote ? `<span style="font-size:0.72rem;color:#b45309;font-weight:600">⚠ ${p.allergyNote}</span>` : ''}
+                </span>`).join('')}
+            </div>
+          </div>`;
+      }).join('');
     }
 
     init();
