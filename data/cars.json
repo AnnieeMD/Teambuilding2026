@@ -1,8 +1,4 @@
 {
   "note": "capacity = max passengers including driver.",
-  "cars": [
-    { "id": "car1", "name": "Car 1 — Blue SUV",      "departure": "2026-10-02T10:00:00", "from": "Office parking lot",     "capacity": 5, "note": "Meeting point at 09:45 sharp." },
-    { "id": "car2", "name": "Car 2 — Grey Van",       "departure": "2026-10-02T10:15:00", "from": "Central train station",  "capacity": 6, "note": "Extra room for luggage." },
-    { "id": "car3", "name": "Car 3 — Red Hatchback",  "departure": "2026-10-02T11:00:00", "from": "Office parking lot",     "capacity": 4, "note": "Leaving a bit later — flexible." }
-  ]
+  "cars": []
 }
