@@ -15,6 +15,7 @@
     { "number": "12", "name": "Room 12", "type": "Double", "floor": "", "capacity": 2 },
     { "number": "13", "name": "Room 13", "type": "Double", "floor": "", "capacity": 2 },
     { "number": "14", "name": "Room 14", "type": "Double", "floor": "", "capacity": 2 },
-    { "number": "15", "name": "Room 15", "type": "Single", "floor": "", "capacity": 1 }
+    { "number": "15", "name": "Room 15", "type": "Single", "floor": "", "capacity": 1 },
+    { "number": "16", "name": "Room 16", "type": "Single", "floor": "", "capacity": 1 }
   ]
 }
